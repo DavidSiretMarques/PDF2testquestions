@@ -1,4 +1,4 @@
 # PDF2testquestions
 This project attempts to take a PDF with some text and create suitable multiple option test questions from that information
 
-It allows you to open an view pdf files
+It allows you to open an view pdf files to compare with the text fed to the model
