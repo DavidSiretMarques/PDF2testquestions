@@ -28,3 +28,6 @@ response = client.models.generate_content(
     model="gemini-2.5-flash", contents="Using the following content as reference, create a test with 5 questions and answers. Use the format seen in {}\n\nReference Content:\n{}\n\nExample Test Format:\n{}\n\nCreate the test now.".format(source_format,source_content, example_content))
 
 print(response.text)
+
+with open("generated_test2.txt","w",encoding="UTF8") as output_file:
+    response = output_file.write(response.text)

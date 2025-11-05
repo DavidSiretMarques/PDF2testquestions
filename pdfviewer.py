@@ -26,7 +26,7 @@ class PDFViewer:
         
         #Setting title and icon of main window
         self.master.title('PDF Viewer')
-        self.master.iconbitmap(root, 'pdf.ico')
+        self.master.iconbitmap(self.master, 'pdf.ico')
 
         #setting window to center of the screen
         self.window_width = 580
@@ -36,7 +36,7 @@ class PDFViewer:
         self.master.geometry(f'{self.window_width}x{self.window_height}+{center_x}+{center_y}')
 
         #Menu
-        menu = tk.Menu(root)
+        menu = tk.Menu(self.master)
         self.master.config(menu=menu)
         file_menu = tk.Menu(menu,tearoff=0)
         menu.add_cascade(label="File", menu=file_menu)
@@ -46,7 +46,7 @@ class PDFViewer:
         file_menu.add_command(label='Open...', command=self.open_file)
         file_menu.add_command(label='Close')
         file_menu.add_separator()
-        file_menu.add_command(label='Exit', command=root.destroy)
+        file_menu.add_command(label='Exit', command=self.master.destroy)
     
         # create the Help menu
         help_menu = tk.Menu(menu, tearoff=0)
