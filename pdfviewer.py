@@ -14,17 +14,11 @@ from pdfminer import PDFMiner
 class PDFViewer:
     # initializing the __init__ / special method
     def __init__(self, master):
-        # path for the pdf doc
         self.path = None
-        # state of the pdf doc, open or closed
         self.fileisopen = None
-        # author of the pdf doc
         self.author = None
-        # name for the pdf doc
         self.name = None
-        # the current page for the pdf
         self.current_page = 0
-        # total number of pages for the pdf doc
         self.numPages = None
 
         # creating the window
@@ -33,10 +27,11 @@ class PDFViewer:
         self.master.title('PDF Viewer')
         # gives dimensions to main window
         self.master.geometry('580x520+440+180')
-        # this disables the minimize/maximize button on the main window
-        self.master.resizable(width = 0, height = 0)
+        # this sets minimum and maximum size for the main window
+        self.master.minsize(500, 500)
+        #self.master.maxsize(800, 800)
         # loads the icon and adds it to the main window
-        self.master.iconbitmap(self.master, 'pdf.ico') #I dont have the icon file
+        self.master.iconbitmap(self.master, 'pdf.ico')
 
         # creating the menu
         self.menu = Menu(self.master)
@@ -51,9 +46,9 @@ class PDFViewer:
         self.filemenu.add_command(label="Exit", command=self.master.destroy)
 
         # creating the top frame
-        self.top_frame = ttk.Frame(self.master, width=580, height=460)
+        self.top_frame = ttk.Frame(self.master, borderwidth=2, relief=RIDGE)
         # placing the frame inside main window using grid()
-        self.top_frame.grid(row=0, column=0)
+        self.top_frame.grid(row=0, column=0, sticky=(N,W,E))
         # the frame will not propagate
         self.top_frame.grid_propagate(False)
         # creating the bottom frame
@@ -77,7 +72,7 @@ class PDFViewer:
         # inserting both vertical and horizontal scrollbars to the canvas
         self.output.configure(yscrollcommand=self.scrolly.set, xscrollcommand=self.scrollx.set)
         # adding the canvas
-        self.output.grid(row=0, column=0)
+        self.output.grid(row=0, column=0, sticky=(N,W,E,S))
         # configuring the horizontal scrollbar to the canvas
         self.scrolly.configure(command=self.output.yview)
         # configuring the vertical scrollbar to the canvas
