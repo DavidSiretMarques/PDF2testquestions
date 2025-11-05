@@ -1,6 +1,6 @@
 from google import genai
 from pypdf import PdfReader
-with open("API_KEY.txt") as f:
+with open("./IA/API_KEY.txt") as f:
     api_key= f.read()
 
 client = genai.Client(api_key=api_key)
@@ -21,7 +21,7 @@ example_content = ""
 for page in reader.pages:
     example_content += page.extract_text() + "\n"
 
-with open("json_format.txt",encoding="UTF8") as format_file:
+with open("./IA/json_format.txt",encoding="UTF8") as format_file:
     source_format = format_file.read()
 
 response = client.models.generate_content(
