@@ -109,6 +109,7 @@ class PDFViewer:
         self.output.config(width=self.output.width, height=self.output.height)
         # rescale all the objects tagged with the "all" tag
         self.output.scale("all",0,0,wscale,hscale)
+        print(f'Width: {self.output.width}, Height: {self.output.height},event width: {event.width}, event height: {event.height}')
     #Create button frame
     def create_button_frame(self):
         frame = ttk.Frame(self.master)

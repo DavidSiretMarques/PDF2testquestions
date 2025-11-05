@@ -1,102 +1,139 @@
-# importing everything from tkinter
-from tkinter import *
-# importing ttk for styling widgets from tkinter
+import tkinter as tk
 from tkinter import ttk
-# importing filedialog from tkinter
 from tkinter import filedialog as fd
-# importing os module
 import os
 # importing the PDFMiner class from the miner file
 from pdfminer import PDFMiner
-
 
 # creating a class called PDFViewer
 class PDFViewer:
     # initializing the __init__ / special method
     def __init__(self, master):
+        
+        self.master=master
+        # path for the pdf doc
         self.path = None
+        # state of the pdf doc, open or closed
         self.fileisopen = None
+        # author of the pdf doc
         self.author = None
+        # name for the pdf doc
         self.name = None
+        # the current page for the pdf
         self.current_page = 0
+        # total number of pages for the pdf doc
         self.numPages = None
-
-        # creating the window
-        self.master = master
-        # gives title to the main window
+        
+        #Setting title and icon of main window
         self.master.title('PDF Viewer')
-        # gives dimensions to main window
-        self.master.geometry('580x520+440+180')
-        # this sets minimum and maximum size for the main window
-        self.master.minsize(500, 500)
-        #self.master.maxsize(800, 800)
-        # loads the icon and adds it to the main window
-        self.master.iconbitmap(self.master, 'pdf.ico')
+        self.master.iconbitmap(root, 'pdf.ico')
 
-        # creating the menu
-        self.menu = Menu(self.master)
-        # adding it to the main window
-        self.master.config(menu=self.menu)
-        # creating a sub menu
-        self.filemenu = Menu(self.menu)
-        # giving the sub menu a label
-        self.menu.add_cascade(label="File", menu=self.filemenu)
-        # adding a two buttons to the sub menus
-        self.filemenu.add_command(label="Open File", command=self.open_file)
-        self.filemenu.add_command(label="Exit", command=self.master.destroy)
+        #setting window to center of the screen
+        self.window_width = 580
+        self.window_height = 520
+        center_x = int(self.master.winfo_screenwidth()/2 - self.window_width / 2)
+        center_y = int(self.master.winfo_screenheight()/2 - self.window_height / 2)
+        self.master.geometry(f'{self.window_width}x{self.window_height}+{center_x}+{center_y}')
 
-        # creating the top frame
-        self.top_frame = ttk.Frame(self.master, borderwidth=2, relief=RIDGE)
-        # placing the frame inside main window using grid()
-        self.top_frame.grid(row=0, column=0, sticky=(N,W,E))
-        # the frame will not propagate
-        self.top_frame.grid_propagate(False)
-        # creating the bottom frame
-        self.bottom_frame = ttk.Frame(self.master, width=580, height=50)
-        # placing the frame inside main window using grid()
-        self.bottom_frame.grid(row=1, column=0)
-        # the frame will not propagate
-        self.bottom_frame.grid_propagate(False)
+        #Menu
+        menu = tk.Menu(root)
+        self.master.config(menu=menu)
+        file_menu = tk.Menu(menu,tearoff=0)
+        menu.add_cascade(label="File", menu=file_menu)
 
-        # creating a vertical scrollbar
-        self.scrolly = Scrollbar(self.top_frame, orient=VERTICAL)
-        # adding the scrollbar
-        self.scrolly.grid(row=0, column=1, sticky=(N,S))
-        # creating a horizontal scrollbar
-        self.scrollx = Scrollbar(self.top_frame, orient=HORIZONTAL)
-        # adding the scrollbar
-        self.scrollx.grid(row=1, column=0, sticky=(W, E))
+        # add menu items to the File menu
+        file_menu.add_command(label='New')
+        file_menu.add_command(label='Open...', command=self.open_file)
+        file_menu.add_command(label='Close')
+        file_menu.add_separator()
+        file_menu.add_command(label='Exit', command=root.destroy)
+    
+        # create the Help menu
+        help_menu = tk.Menu(menu, tearoff=0)
+        help_menu.add_command(label='Welcome')
+        help_menu.add_command(label='About...')
 
-        # creating the canvas for display the PDF pages
-        self.output = Canvas(self.top_frame, bg='#ECE8F3', width=560, height=435)
-        # inserting both vertical and horizontal scrollbars to the canvas
-        self.output.configure(yscrollcommand=self.scrolly.set, xscrollcommand=self.scrollx.set)
-        # adding the canvas
-        self.output.grid(row=0, column=0, sticky=(N,W,E,S))
-        # configuring the horizontal scrollbar to the canvas
-        self.scrolly.configure(command=self.output.yview)
-        # configuring the vertical scrollbar to the canvas
-        self.scrollx.configure(command=self.output.xview)
-        # configuring the vertical scrollbar to the canvas
-        self.scrollx.configure(command=self.output.xview)
-        # loading the button icons
-        self.uparrow_icon = PhotoImage(file='arrowup.png')
-        self.downarrow_icon = PhotoImage(file='arrowdown.png')
+        # add the Help menu to the menubar
+        menu.add_cascade(label="Help", menu=help_menu)
+
+        # layout on the root window
+        self.master.rowconfigure(0, weight=4)
+        self.master.rowconfigure(1, weight=1)
+
+        self.viewer_frame = self.create_viewer_frame()
+        self.viewer_frame.grid(column=0, row=0)
+
+        button_frame = self.create_button_frame()
+        button_frame.grid(column=0, row=1)
+    
+    #Create viewer frame
+    def create_viewer_frame(self):
+        
+        frame = ttk.Frame(self.master)
+
+        # grid layout for the input frame
+        frame.rowconfigure(0, weight=1)
+        frame.rowconfigure(0, weight=3)
+
+        # Create Canvas to view pdf
+        self.output = tk.Canvas(frame, bg='#ECE8F3', width=560, height=435, highlightthickness=0)
+        #Configuring the resize event for canvas (NOT WORKING PROPERLY YET)
+        #self.output.bind("<Configure>", self.on_resize)
+        #self.output.height = self.output.winfo_reqheight()
+        #self.output.width = self.output.winfo_reqwidth()
+        self.output.grid(column=0, row=0, sticky=tk.N)
+
+        #create scrollbars and set them
+        xscrollbar = ttk.Scrollbar(frame, orient=tk.HORIZONTAL)
+        xscrollbar.grid(column=0, row=1, sticky=(tk.W, tk.E))
+        yscrollbar = ttk.Scrollbar(frame, orient=tk.VERTICAL)
+        yscrollbar.grid(column=1, row=0, sticky=(tk.N, tk.S))
+        self.output['xscrollcommand'] = xscrollbar.set
+        self.output['yscrollcommand'] = yscrollbar.set
+        xscrollbar.config(command=self.output.xview)
+        yscrollbar.config(command=self.output.yview)
+        self.page_label = ttk.Label(frame, text='page')
+        self.page_label.grid(row=2, column=0, padx=5)
+
+        for widget in frame.winfo_children():
+            widget.grid(padx=5, pady=5)
+
+        return frame
+
+    #Function to resize canvas and its content (NOT WORKING PROPERLY YET)
+    """
+    def on_resize(self,event):
+        # determine the ratio of old width/height to new width/height
+        wscale = float(event.width)/self.output.width
+        hscale = float(event.height)/self.output.height
+        self.output.width = event.width
+        self.output.height = event.height
+        # resize the canvas 
+        self.output.config(width=self.output.width, height=self.output.height)
+        # rescale all the objects tagged with the "all" tag
+        self.output.scale("all",0,0,wscale,hscale)
+        print(f'Width: {self.output.width}, Height: {self.output.height},event width: {event.width}, event height: {event.height}')
+    """
+    #Create button frame
+    def create_button_frame(self):
+        frame = ttk.Frame(self.master)
+
+        frame.rowconfigure(0, weight=1)
+        
+        self.uparrow_icon = tk.PhotoImage(file='arrowup.png')
+        self.downarrow_icon = tk.PhotoImage(file='arrowdown.png')
         # resizing the icons to fit on buttons
         self.uparrow = self.uparrow_icon.subsample(1, 1)
         self.downarrow = self.downarrow_icon.subsample(1, 1)
-        # creating an up button with an icon
-        self.upbutton = ttk.Button(self.bottom_frame, image=self.uparrow, command=self.previous_page)
-        # adding the button
+        self.upbutton = ttk.Button(frame, image=self.uparrow, command=self.previous_page)
         self.upbutton.grid(row=0, column=1, padx=(250, 5), pady=8)
-        # creating a down button with an icon
-        self.downbutton = ttk.Button(self.bottom_frame, image=self.downarrow, command=self.next_page)
-        # adding the button
-        self.downbutton.grid(row=0, column=3, pady=8)
-        # label for displaying page numbers
-        self.page_label = ttk.Label(self.bottom_frame, text='page')
-        # adding the label
-        self.page_label.grid(row=0, column=4, padx=5)
+        self.downbutton = ttk.Button(frame, image=self.downarrow, command=self.next_page)
+        self.downbutton.grid(row=0, column=2, pady=8)
+
+        for widget in frame.winfo_children():
+            widget.grid(padx=5, pady=5)
+
+        return frame
 
     # function for opening pdf files
     def open_file(self):
@@ -145,10 +182,10 @@ class PDFViewer:
             # updating the page label with number of pages 
             self.page_label['text'] = str(self.stringified_current_page) + ' of ' + str(self.numPages)
             # creating a region for inserting the page inside the Canvas
-            region = self.output.bbox(ALL)
+            region = self.output.bbox(tk.ALL)
             # making the region to be scrollable
             self.output.configure(scrollregion=region)
-
+            
     # function for displaying next page
     def next_page(self):
         # checking if file is open
@@ -170,9 +207,8 @@ class PDFViewer:
                 self.current_page -= 1
                 # displaying the previous page
                 self.display_page()
-# creating the root window using Tk() class
-root = Tk()
-# instantiating/creating object app for class PDFViewer
-app = PDFViewer(root)
-# calling the mainloop to run the app infinitely until user closes it
-root.mainloop()
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = PDFViewer(root)
+    root.mainloop()
