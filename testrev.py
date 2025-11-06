@@ -1,102 +1,65 @@
-import tkinter as tk
-from tkinter import ttk
+import sys
+import random
+from PySide6 import QtCore, QtGui
+from PySide6.QtWidgets import QWidget, QMenuBar, QMenu, QGroupBox, QHBoxLayout, QRadioButton, QPushButton, QLabel, QVBoxLayout, QApplication
 
-# creating a class called PDFViewer
-class TestSimu:
-    # initializing the __init__ / special method
-    def __init__(self, master):
-        self.master=master
-
-        #Setting title and icon of main window
-        self.master.title('Revisión de preguntas')
-        self.master.iconbitmap(self.master, 'working.ico')
-
-        #setting window to center of the screen
-        self.window_width = 580
-        self.window_height = 520
-        center_x = int(self.master.winfo_screenwidth()/2 - self.window_width / 2)
-        center_y = int(self.master.winfo_screenheight()/2 - self.window_height / 2)
-        self.master.geometry(f'{self.window_width}x{self.window_height}+{center_x}+{center_y}')
-
-        #Menu (WIP)
-        menu = tk.Menu(self.master)
-        self.master.config(menu=menu)
-        file_menu = tk.Menu(menu,tearoff=0)
-        menu.add_cascade(label="File", menu=file_menu)
-        # add menu items to the File menu
-        file_menu.add_command(label='New')
-        file_menu.add_command(label='Open...')#, command=self.open_file)
-        file_menu.add_command(label='Close')
-        file_menu.add_separator()
-        file_menu.add_command(label='Exit', command=self.master.destroy)
-        # create the Help menu
-        help_menu = tk.Menu(menu, tearoff=0)
-        help_menu.add_command(label='Welcome')
-        help_menu.add_command(label='About...')
-        # add the Help menu to the menubar
-        menu.add_cascade(label="Help", menu=help_menu)
-
-        # layout on the root window
-        self.master.rowconfigure(0, weight=4)
-        self.master.rowconfigure(1, weight=1)
+class TestRev(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Revisión de preguntas")
+        self.setWindowIcon(QtGui.QIcon('working.ico'))
+        self.options = [QRadioButton(opcion) for opcion in question['opciones']]
+        #create control buttons
+        self.buttonprev = QPushButton("Anterior")
+        self.buttonnext = QPushButton("Siguiente")
+        self.buttoncorr = QPushButton("Corregir")
+        self.buttonfin = QPushButton("Finalizar")
+        self.buttonsave = QPushButton("Guardar pregunta")
+        self.buttondel = QPushButton("Eliminar pregunta")
+        self.text = QLabel(question['pregunta'], alignment=QtCore.Qt.AlignTop)
         
-        #Creating Question and button frames
-        question_frame = self.create_question_frame()
-        question_frame.grid(column=0, row=0, sticky=(tk.N,tk.W,tk.E))
-        button_frame = self.create_button_frame()
-        button_frame.grid(column=0, row=1, sticky=(tk.S,tk.W,tk.E))
+        #Set button layout
+        self.create_button_group_box()
+
+        self.layout = QVBoxLayout(self)
+        self.layout.addWidget(self.text)
+        for option in self.options:
+            self.layout.addWidget(option)
+        self.layout.addWidget(self._button_group_box)
         
-        self.master.grid_rowconfigure(0, weight=10)
-        self.master.grid_rowconfigure(1, weight=1)
-    
-    #Create question frame
-    def create_question_frame(self):
+        self.buttoncorr.clicked.connect(self.corregir)
+        self.buttonfin.clicked.connect(self.close)
+
+    @QtCore.Slot()
+    def corregir(self):
+        for option in self.options:
+            if option.isChecked():
+                if option.text() == question['respuesta']:
+                    self.options = [option.setStyleSheet("color: green;") for option in self.options]
+                else:
+                    self.options = [option.setStyleSheet("color: red;") for option in self.options]
+                    
+    def create_menu(self):
+        self._menu_bar = QMenuBar()
+
+        self._file_menu = QMenu("&File", self)
+        self._exit_action = self._file_menu.addAction("E&xit")
+        self._menu_bar.addMenu(self._file_menu)
+
+        self._exit_action.triggered.connect(self.accept)
         
-        frame = ttk.Frame(self.master)
+    def create_button_group_box(self):
+        self._button_group_box = QGroupBox(flat=True)
+        layout = QHBoxLayout()
 
-        # Create Question and options
-        selected_option=tk.StringVar()
-        self.question = tk.Label(frame, bg='#FFFFFF', text=question['pregunta'], wraplength=self.window_width, justify='left',relief='solid', borderwidth=1)
-        self.question.grid(column=0, row=0, sticky=(tk.N,tk.W,tk.E))
-        self.options = ttk.Frame(frame)
-        self.options.grid(column=0, row=1, sticky=(tk.N,tk.W,tk.E))
-        self.options.opt1 = ttk.Radiobutton(self.options, text=question['opciones'][0],value=question['opciones'][0], variable=selected_option)
-        self.options.opt1.grid(column=0, row=0, sticky=(tk.N,tk.W,tk.E))
-        self.options.opt2 = ttk.Radiobutton(self.options, text=question['opciones'][1],value=question['opciones'][1], variable=selected_option)
-        self.options.opt2.grid(column=0, row=1, sticky=(tk.N,tk.W,tk.E))
-        self.options.grid(column=0, row=1, sticky=(tk.N,tk.W,tk.E))
-        self.options.opt3 = ttk.Radiobutton(self.options, text=question['opciones'][2],value=question['opciones'][2], variable=selected_option)
-        self.options.opt3.grid(column=0, row=2, sticky=(tk.N,tk.W,tk.E))
-        self.options.opt4 = ttk.Radiobutton(self.options, text=question['opciones'][3],value=question['opciones'][3], variable=selected_option)
-        self.options.opt4.grid(column=0, row=3, sticky=(tk.N,tk.W,tk.E))
+        self._button_group_box.setLayout(layout)
+        layout.addWidget(self.buttonprev)
+        layout.addWidget(self.buttonnext)
+        layout.addWidget(self.buttoncorr)
+        layout.addWidget(self.buttonfin)
+        layout.addWidget(self.buttonsave)
+        layout.addWidget(self.buttondel)
         
-        # Set weights for responsiveness (WIP   -- not working as intended)
-        frame.rowconfigure(0, weight=10)
-        frame.rowconfigure(1, weight=1)
-
-        for widget in frame.winfo_children():
-            widget.grid(padx=5, pady=5)
-
-        return frame
-
-    #Create button frame
-    def create_button_frame(self):
-        frame = ttk.Frame(self.master)
-
-        frame.rowconfigure(0, weight=1)
-        
-        ttk.Button(frame, text='Anterior').grid(column=0, row=0)
-        ttk.Button(frame, text='Siguient').grid(column=1, row=0)
-        ttk.Button(frame, text='Corregir').grid(column=2, row=0)
-        ttk.Button(frame, text='Finalizar').grid(column=3, row=0)
-        ttk.Button(frame, text='Guardar pregunta').grid(column=4, row=0)
-        ttk.Button(frame, text='Eliminar pregunta').grid(column=5, row=0)
-
-        for widget in frame.winfo_children():
-            widget.grid(padx=5, pady=5)
-
-        return frame
-
 if __name__ == "__main__":
     question = {
         "pregunta": "Según el Reglamento de Instalaciones de Protección Contra Incendios, ¿cuál es el objeto principal de este Reglamento?",
@@ -112,6 +75,10 @@ if __name__ == "__main__":
         "creation_date": "5/11/2025",
         "reference": "Artículo 1. Objeto y ámbito de aplicación material. 1. Constituye el objeto de este Reglamento la determinación de las condiciones y los requisitos exigibles al diseño, instalación/aplicación, mantenimiento e inspección de los equipos, sistemas y componentes que conforman las instalaciones de protección activa contra incendios."
     }
-    root = tk.Tk()
-    app = TestSimu(root)
-    root.mainloop()
+    app = QApplication([])
+
+    widget = TestRev()
+    widget.resize(800, 600)
+    widget.show()
+
+    sys.exit(app.exec())
