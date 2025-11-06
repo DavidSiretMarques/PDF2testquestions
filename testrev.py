@@ -26,7 +26,7 @@ class TestRev(QWidget):
         for option in self.options:
             self.layout.addWidget(option)
         self.layout.addWidget(self._button_group_box)
-        
+
         self.buttoncorr.clicked.connect(self.corregir)
         self.buttonfin.clicked.connect(self.close)
 
@@ -38,6 +38,7 @@ class TestRev(QWidget):
                     self.options = [option.setStyleSheet("color: green;") for option in self.options]
                 else:
                     self.options = [option.setStyleSheet("color: red;") for option in self.options]
+        self.layout.addWidget(QLabel(question['reference'], alignment=QtCore.Qt.AlignCenter))
                     
     def create_menu(self):
         self._menu_bar = QMenuBar()
