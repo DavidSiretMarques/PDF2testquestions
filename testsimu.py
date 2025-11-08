@@ -4,12 +4,13 @@ from PySide6.QtWidgets import (QWidget, QMenuBar, QMenu, QGroupBox, QHBoxLayout,
                                QPushButton, QLabel, QVBoxLayout, QGridLayout, QApplication, QFrame,
                                QStackedLayout, QDialog)
 
-class TestRev(QWidget):
+class TestSimu(QWidget):
     def __init__(self, questions):
         super().__init__()
         self.setWindowTitle("Revisión de preguntas")
         self.setWindowIcon(QtGui.QIcon('working.ico'))
         self.questions = questions
+        #self.current_question_index = 0
 
         #Set question and button layout
         self.create_questions()
@@ -17,19 +18,17 @@ class TestRev(QWidget):
 
         #Add everything to layout
         self.layout = QGridLayout(self)
-        self.layout.addLayout(self._question_layout,0,0)
-        self.layout.addWidget(self._button_group_box,1,0)
+        self.layout.addLayout(self._question_layout,0,1)
+        self.layout.addWidget(self._button_group_box,1,1)
 
         #Set button actions
-        self.buttoncorr.clicked.connect(self.corregir)
         self.buttonnext.clicked.connect(self.next_question)
         self.buttonprev.clicked.connect(self.prev_question)
-        self.buttonsave.clicked.connect(self.save_question)
-        self.buttondel.clicked.connect(self.delete_question)
-        self.buttonfin.clicked.connect(self.close)
+        self.buttonfin.clicked.connect(self.end_test)
 
     @QtCore.Slot()
-    def corregir(self):
+    def end_test(self):
+        self._question_layout.setCurrentWidget()
         for option in self._question_layout.currentWidget().findChildren(QRadioButton):
             if option.text() == self.questions[self._question_layout.currentIndex()]['respuesta']:
                 option.setStyleSheet("color: green;")
@@ -64,14 +63,6 @@ class TestRev(QWidget):
             notice_layout.addWidget(notice_label)
             notice.resize(200,100)
             notice.exec()
-    
-    @QtCore.Slot()
-    def save_question(self): #WIP
-        pass
-    
-    @QtCore.Slot()
-    def delete_question(self): #WIP
-        pass
 
     def create_menu(self): #WIP
         self._menu_bar = QMenuBar()
@@ -97,15 +88,12 @@ class TestRev(QWidget):
             self._question_layout.addWidget(question_group)
 
     def create_button_group(self):
-        
+
         #create control buttons
         self.buttonprev = QPushButton("Anterior")
         self.buttonnext = QPushButton("Siguiente")
-        self.buttoncorr = QPushButton("Corregir")
         self.buttonfin = QPushButton("Finalizar")
-        self.buttonsave = QPushButton("Guardar pregunta")
-        self.buttondel = QPushButton("Eliminar pregunta")
-        
+
         #Create button layout
         self._button_group_box = QGroupBox(flat=True)
         layout = QHBoxLayout()
@@ -113,12 +101,10 @@ class TestRev(QWidget):
         self._button_group_box.setLayout(layout)
         layout.addWidget(self.buttonprev)
         layout.addWidget(self.buttonnext)
-        layout.addWidget(self.buttoncorr)
         layout.addWidget(self.buttonfin)
-        layout.addWidget(self.buttonsave)
-        layout.addWidget(self.buttondel)
-    
+
 if __name__ == "__main__":
+    
     qs = [
     {
         "pregunta": "Según el Reglamento de Instalaciones de Protección Contra Incendios, ¿cuál es el objeto principal de este Reglamento?",
@@ -193,7 +179,7 @@ if __name__ == "__main__":
 ]
     app = QApplication([])
 
-    widget = TestRev(qs)
+    widget = TestSimu(qs)
     widget.resize(600, 600)
     widget.show()
 
