@@ -2,7 +2,7 @@ import sys
 from PySide6 import QtCore, QtGui
 from PySide6.QtWidgets import (QWidget, QMenuBar, QMenu, QGroupBox, QHBoxLayout, QRadioButton,
                                QPushButton, QLabel, QVBoxLayout, QGridLayout, QApplication, QFrame,
-                               QStackedLayout, QDialog)
+                               QStackedLayout, QDialog, QScrollArea)
 
 class TestSimu(QWidget):
     def __init__(self, questions):
@@ -54,6 +54,10 @@ class TestSimu(QWidget):
             question_layout.addWidget(QFrame(frameShape=QFrame.HLine))
             question_layout.addWidget(QLabel(f"Referencia: {question['reference']}", wordWrap=True))
             notice_layout.addWidget(question_group)
+        
+        scrollArea = QScrollArea()
+        #scrollArea.setBackgroundRole(QPalette.Dark)
+        scrollArea.setWidget(notice) #Scroll Area not working properly
         notice.exec()
 
     @QtCore.Slot()
