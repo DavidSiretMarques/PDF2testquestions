@@ -27,15 +27,35 @@ class TestSimu(QWidget):
         self.buttonfin.clicked.connect(self.end_test)
 
     @QtCore.Slot()
-    def end_test(self):
-        self._question_layout.setCurrentWidget()
-        for option in self._question_layout.currentWidget().findChildren(QRadioButton):
-            if option.text() == self.questions[self._question_layout.currentIndex()]['respuesta']:
-                option.setStyleSheet("color: green;")
-            else:
-                option.setStyleSheet("color: red;")
-        self._question_layout.currentWidget().findChildren(QLabel)[1].setText(f"Referencia: {self.questions[self._question_layout.currentIndex()]['reference']}")
-    
+    def end_test(self): #WIP
+        notice = QDialog()
+        notice.setWindowTitle("Corrección")
+        notice_layout = QVBoxLayout()
+        notice.setLayout(notice_layout)
+        notice_label = QLabel("Corrección de las preguntas.")
+        notice_layout.addWidget(notice_label)
+        for question in self.questions:
+            question_group = QGroupBox()
+            question_layout = QVBoxLayout()
+            question_group.setLayout(question_layout)
+            #Iteratively create question and options
+            question_layout.addWidget(QLabel(question['pregunta'], wordWrap=True))
+            for i, option in enumerate(question['opciones']):
+                opt_button = QRadioButton(option)#, checked=True if self._question_layout.findChildren(QGroupBox)[i].findChildren(QRadioButton).isChecked()==True else False)
+                for question_options in self._question_layout.findChildren(QGroupBox):
+                    for radio_option in question_options.findChildren(QRadioButton):
+                        if radio_option.isChecked():
+                            opt_button.setChecked(True)
+                if opt_button.text() == question['respuesta']:
+                    opt_button.setStyleSheet("color: green;")
+                else:
+                    opt_button.setStyleSheet("color: red;")
+                question_layout.addWidget(opt_button)
+            question_layout.addWidget(QFrame(frameShape=QFrame.HLine))
+            question_layout.addWidget(QLabel(f"Referencia: {question['reference']}", wordWrap=True))
+            notice_layout.addWidget(question_group)
+        notice.exec()
+
     @QtCore.Slot()
     def next_question(self):
         if self._question_layout.currentIndex() < len(self.questions) - 1:
@@ -104,7 +124,7 @@ class TestSimu(QWidget):
         layout.addWidget(self.buttonfin)
 
 if __name__ == "__main__":
-    
+
     qs = [
     {
         "pregunta": "Según el Reglamento de Instalaciones de Protección Contra Incendios, ¿cuál es el objeto principal de este Reglamento?",
