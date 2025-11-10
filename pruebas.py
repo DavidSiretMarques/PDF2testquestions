@@ -9,7 +9,7 @@ from PySide6 import QtCore
 
 # --- Datos de ejemplo (Simulación) ---
 # En un proyecto real, cargarías esto desde una base de datos o un archivo.
-EJEMPLO_PREGUNTAS = qs = [
+EJEMPLO_PREGUNTAS = [
     {
         "pregunta": "Según el Reglamento de Instalaciones de Protección Contra Incendios, ¿cuál es el objeto principal de este Reglamento?",
         "opciones": [
