@@ -41,13 +41,20 @@ class TestSimu(QWidget):
             question_group.setLayout(question_layout)
             #Iteratively create question and options
             question_layout.addWidget(QLabel(question['pregunta'], wordWrap=True))
+            option_button = ["a)","b)","c)","d)"] #Hardcoded for 4 options
             for  j,option in enumerate(question['opciones']):
-                opt_button = QRadioButton(option, enabled=False, checked=True if self._question_layout.widget(i).findChildren(QRadioButton)[j].isChecked()==True else False)
-                if opt_button.text() == question['respuesta']:
-                    opt_button.setStyleSheet("color: green;")
+                opt_button = QRadioButton(option_button[j], enabled=False, checked=True if self._question_layout.widget(i).findChildren(QRadioButton)[j].isChecked()==True else False)
+                opt_label = QLabel(option, wordWrap=True, )
+                if opt_label.text() == question['respuesta']:
+                    opt_label.setStyleSheet("background-color: green;")
+                    opt_button.setStyleSheet("background-color: green;")
                 else:
-                    opt_button.setStyleSheet("color: red;")
-                question_layout.addWidget(opt_button)
+                    opt_button.setStyleSheet("background-color: red;")
+                    opt_label.setStyleSheet("background-color: red;")
+                ly = QHBoxLayout()
+                ly.addWidget(opt_button,1)
+                ly.addWidget(opt_label,10)
+                question_layout.addLayout(ly)
 
             question_layout.addWidget(QFrame(frameShape=QFrame.HLine))
             question_layout.addWidget(QLabel(f"Referencia: {question['reference']}", wordWrap=True))
@@ -105,13 +112,22 @@ class TestSimu(QWidget):
     def create_questions(self):
         #Set Question layout
         self._question_layout = QStackedLayout()
+        opciones = ["a)","b)","c)","d)"] #Hardcoded for 4 options
+        #Iteratively create question and options
         for question in self.questions:
             question_group = QGroupBox()
             question_layout = QVBoxLayout()
             question_group.setLayout(question_layout)
-            #Iteratively create question and options
             question_layout.addWidget(QLabel(question['pregunta'], wordWrap=True))
-            [question_layout.addWidget(QRadioButton(opcion)) for opcion in question['opciones']]
+            #Create options
+            for j,option in enumerate(question['opciones']):
+                opt_button = QRadioButton(opciones[j])
+                opt_label = QLabel(option, wordWrap=True)
+                ly = QHBoxLayout()
+                ly.setSpacing(0)
+                ly.addWidget(opt_button,1)
+                ly.addWidget(opt_label,10)
+                question_layout.addLayout(ly)
             question_layout.addWidget(QFrame(frameShape=QFrame.HLine))
             question_layout.addWidget(QLabel("Referencia:", wordWrap=True))
             self._question_layout.addWidget(question_group)
