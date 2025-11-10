@@ -30,34 +30,38 @@ class TestSimu(QWidget):
     def end_test(self): #WIP
         notice = QDialog()
         notice.setWindowTitle("Corrección")
-        notice_layout = QVBoxLayout()
-        notice.setLayout(notice_layout)
+        notice_widget = QWidget()
+        notice_layout = QVBoxLayout(notice_widget)
+        notice_widget.setLayout(notice_layout)
         notice_label = QLabel("Corrección de las preguntas.")
         notice_layout.addWidget(notice_label)
-        for question in self.questions:
+        for i,question in enumerate(self.questions):
             question_group = QGroupBox()
             question_layout = QVBoxLayout()
             question_group.setLayout(question_layout)
             #Iteratively create question and options
             question_layout.addWidget(QLabel(question['pregunta'], wordWrap=True))
-            for i, option in enumerate(question['opciones']):
-                opt_button = QRadioButton(option)#, checked=True if self._question_layout.findChildren(QGroupBox)[i].findChildren(QRadioButton).isChecked()==True else False)
-                for question_options in self._question_layout.findChildren(QGroupBox):
-                    for radio_option in question_options.findChildren(QRadioButton):
-                        if radio_option.isChecked():
-                            opt_button.setChecked(True)
+            for  j,option in enumerate(question['opciones']):
+                opt_button = QRadioButton(option, enabled=False, checked=True if self._question_layout.widget(i).findChildren(QRadioButton)[j].isChecked()==True else False)
                 if opt_button.text() == question['respuesta']:
                     opt_button.setStyleSheet("color: green;")
                 else:
                     opt_button.setStyleSheet("color: red;")
                 question_layout.addWidget(opt_button)
+
             question_layout.addWidget(QFrame(frameShape=QFrame.HLine))
             question_layout.addWidget(QLabel(f"Referencia: {question['reference']}", wordWrap=True))
             notice_layout.addWidget(question_group)
-        
+            print(f'Question Added {i}')
+
+        #Make scrollable (WIP)
         scrollArea = QScrollArea()
-        #scrollArea.setBackgroundRole(QPalette.Dark)
-        scrollArea.setWidget(notice) #Scroll Area not working properly
+        scrollArea.setWidgetResizable(True)
+        scrollArea.setWidget(notice_widget)
+        notice_ly = QVBoxLayout(notice)
+        notice_ly.addWidget(notice_widget)
+        notice.setLayout(notice_ly)
+        notice.show()
         notice.exec()
 
     @QtCore.Slot()
