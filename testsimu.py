@@ -7,8 +7,8 @@ from PySide6.QtWidgets import (QWidget, QMenuBar, QMenu, QGroupBox, QHBoxLayout,
 class TestSimu(QWidget):
     def __init__(self, questions):
         super().__init__()
-        self.setWindowTitle("Revisión de preguntas")
-        self.setWindowIcon(QtGui.QIcon('working.ico'))
+        self.setWindowTitle("Simulacro")
+        self.setWindowIcon(QtGui.QIcon('exam.ico'))
         self.questions = questions
         #self.current_question_index = 0
 
@@ -27,14 +27,14 @@ class TestSimu(QWidget):
         self.buttonfin.clicked.connect(self.end_test)
 
     @QtCore.Slot()
-    def end_test(self): #WIP
+    def end_test(self):
         notice = QDialog()
         notice.setWindowTitle("Corrección")
-        notice_widget = QWidget()
-        notice_layout = QVBoxLayout(notice_widget)
-        notice_widget.setLayout(notice_layout)
-        notice_label = QLabel("Corrección de las preguntas.")
-        notice_layout.addWidget(notice_label)
+        content_widget = QWidget()
+        content_layout = QVBoxLayout(content_widget)
+        content_widget.setLayout(content_layout)
+        title_label = QLabel("Corrección de las preguntas.")
+        content_layout.addWidget(title_label)
         for i,question in enumerate(self.questions):
             question_group = QGroupBox()
             question_layout = QVBoxLayout()
@@ -51,16 +51,17 @@ class TestSimu(QWidget):
 
             question_layout.addWidget(QFrame(frameShape=QFrame.HLine))
             question_layout.addWidget(QLabel(f"Referencia: {question['reference']}", wordWrap=True))
-            notice_layout.addWidget(question_group)
+            content_layout.addWidget(question_group)
             print(f'Question Added {i}')
 
-        #Make scrollable (WIP)
-        scrollArea = QScrollArea()
-        scrollArea.setWidgetResizable(True)
-        scrollArea.setWidget(notice_widget)
-        notice_ly = QVBoxLayout(notice)
-        notice_ly.addWidget(notice_widget)
-        notice.setLayout(notice_ly)
+        #Make scrollable
+        scroll_Area = QScrollArea()
+        scroll_Area.setWidgetResizable(True)
+        scroll_Area.setWidget(content_widget)
+        main_layout = QVBoxLayout(notice)
+        main_layout.addWidget(scroll_Area)
+
+        #Show and execute)
         notice.show()
         notice.exec()
 
@@ -130,6 +131,7 @@ class TestSimu(QWidget):
         layout.addWidget(self.buttonprev)
         layout.addWidget(self.buttonnext)
         layout.addWidget(self.buttonfin)
+
 
 if __name__ == "__main__":
 
