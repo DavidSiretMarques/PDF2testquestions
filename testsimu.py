@@ -2,7 +2,8 @@ import sys
 from PySide6 import QtCore, QtGui
 from PySide6.QtWidgets import (QWidget, QMenuBar, QMenu, QGroupBox, QHBoxLayout, QRadioButton,
                                QPushButton, QLabel, QVBoxLayout, QGridLayout, QApplication, QFrame,
-                               QStackedLayout, QDialog, QScrollArea)
+                               QStackedLayout, QSplitter, QDialog, QScrollArea, QMainWindow,
+                               QListWidget, QSizePolicy)
 
 class TestSimu(QWidget):
     def __init__(self, questions):
@@ -10,95 +11,34 @@ class TestSimu(QWidget):
         self.setWindowTitle("Simulacro")
         self.setWindowIcon(QtGui.QIcon('exam.ico'))
         self.questions = questions
-        #self.current_question_index = 0
 
-        #Set question and button layout
+        # --- Widget Central Contenedor ---
+        #central_widget = QWidget()
+        #self.setCentralWidget(central_widget)
+
+        # Diseño principal (Horizontal: Lista | Contenido)
+        #main_layout = QHBoxLayout(central_widget)
+
+        # QSplitter permite redimensionar los paneles arrastrando
+        splitter = QSplitter(QtCore.Qt.Orientation.Horizontal)
+        #main_layout.addWidget(splitter)
+
+        #Set question list, question and button layout
+        #self._create_question_list(splitter)
         self.create_questions()
         self.create_button_group()
 
         #Add everything to layout
         self.layout = QGridLayout(self)
+        self.layout.addWidget(splitter)
         self.layout.addLayout(self._question_layout,0,1)
         self.layout.addWidget(self._button_group_box,1,1)
 
         #Set button actions
-        self.buttonnext.clicked.connect(self.next_question)
-        self.buttonprev.clicked.connect(self.prev_question)
-        self.buttonfin.clicked.connect(self.end_test)
+        self.buttonnext.clicked.connect(self._next_question)
+        self.buttonprev.clicked.connect(self._prev_question)
+        self.buttonfin.clicked.connect(self._end_test)
 
-    @QtCore.Slot()
-    def end_test(self):
-        notice = QDialog()
-        notice.setWindowTitle("Corrección")
-        content_widget = QWidget()
-        content_layout = QVBoxLayout(content_widget)
-        content_widget.setLayout(content_layout)
-        title_label = QLabel("Corrección de las preguntas.")
-        content_layout.addWidget(title_label)
-        for i,question in enumerate(self.questions):
-            question_group = QGroupBox()
-            question_layout = QVBoxLayout()
-            question_group.setLayout(question_layout)
-            #Iteratively create question and options
-            question_layout.addWidget(QLabel(question['pregunta'], wordWrap=True))
-            option_button = ["a)","b)","c)","d)"] #Hardcoded for 4 options
-            for  j,option in enumerate(question['opciones']):
-                opt_button = QRadioButton(option_button[j], enabled=False, checked=True if self._question_layout.widget(i).findChildren(QRadioButton)[j].isChecked()==True else False)
-                opt_label = QLabel(option, wordWrap=True, )
-                if opt_label.text() == question['respuesta']:
-                    opt_label.setStyleSheet("background-color: green;")
-                    opt_button.setStyleSheet("background-color: green;")
-                else:
-                    opt_button.setStyleSheet("background-color: red;")
-                    opt_label.setStyleSheet("background-color: red;")
-                ly = QHBoxLayout()
-                ly.addWidget(opt_button,1)
-                ly.addWidget(opt_label,10)
-                question_layout.addLayout(ly)
-
-            question_layout.addWidget(QFrame(frameShape=QFrame.HLine))
-            question_layout.addWidget(QLabel(f"Referencia: {question['reference']}", wordWrap=True))
-            content_layout.addWidget(question_group)
-            print(f'Question Added {i}')
-
-        #Make scrollable
-        scroll_Area = QScrollArea()
-        scroll_Area.setWidgetResizable(True)
-        scroll_Area.setWidget(content_widget)
-        main_layout = QVBoxLayout(notice)
-        main_layout.addWidget(scroll_Area)
-
-        #Show and execute)
-        notice.show()
-        notice.exec()
-
-    @QtCore.Slot()
-    def next_question(self):
-        if self._question_layout.currentIndex() < len(self.questions) - 1:
-            self._question_layout.setCurrentIndex(self._question_layout.currentIndex() + 1)
-        else:
-            notice = QDialog()
-            notice.setWindowTitle("Aviso")
-            notice_layout = QVBoxLayout()
-            notice.setLayout(notice_layout)
-            notice_label = QLabel("Ha llegado a la última pregunta.")
-            notice_layout.addWidget(notice_label)
-            notice.resize(200,100)
-            notice.exec()
-
-    @QtCore.Slot()
-    def prev_question(self):
-        if self._question_layout.currentIndex() > 0:
-            self._question_layout.setCurrentIndex(self._question_layout.currentIndex() - 1)
-        else:
-            notice = QDialog()
-            notice.setWindowTitle("Aviso")
-            notice_layout = QVBoxLayout()
-            notice.setLayout(notice_layout)
-            notice_label = QLabel("Ha llegado a la primera pregunta.")
-            notice_layout.addWidget(notice_label)
-            notice.resize(200,100)
-            notice.exec()
 
     def create_menu(self): #WIP
         self._menu_bar = QMenuBar()
@@ -147,6 +87,104 @@ class TestSimu(QWidget):
         layout.addWidget(self.buttonprev)
         layout.addWidget(self.buttonnext)
         layout.addWidget(self.buttonfin)
+
+    """def _create_question_list(self, parent_splitter):
+        """"Crea y configura el QListWidget para la navegación.""""
+        self.lista_preguntas = QListWidget()
+        self.lista_preguntas.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
+        parent_splitter.addWidget(self.lista_preguntas)
+
+        # Llenar la lista con los títulos
+        for i in range(len(self.questions)):
+            self.lista_preguntas.addItem(f"Pregunta {i+1}")
+
+        # Conectar el clic de la lista al método de navegación
+        #self.lista_preguntas.currentRowChanged.connect(self._navegar_por_lista)
+    """
+    
+    #Navigation methods
+    @QtCore.Slot()
+    def _list_navigation(self, index):
+        """Navega a la pregunta seleccionada en la lista."""
+        if 0 <= index < len(self.questions):
+            self._question_layout.setCurrentIndex(index)
+
+    @QtCore.Slot()
+    def _prev_question(self):
+        """Navega a la pregunta anterior. Si no existe, muestra un aviso."""
+        if self._question_layout.currentIndex() > 0:
+            self._question_layout.setCurrentIndex(self._question_layout.currentIndex() - 1)
+        else:
+            notice = QDialog()
+            notice.setWindowTitle("Aviso")
+            notice_layout = QVBoxLayout()
+            notice.setLayout(notice_layout)
+            notice_label = QLabel("Ha llegado a la primera pregunta.")
+            notice_layout.addWidget(notice_label)
+            #notice.resize(200,100)
+            notice.exec()
+
+    @QtCore.Slot()
+    def _next_question(self):
+        """Navega a la siguiente pregunta. Si no existe, muestra un aviso."""
+        if self._question_layout.currentIndex() < len(self.questions) - 1:
+            self._question_layout.setCurrentIndex(self._question_layout.currentIndex() + 1)
+        else:
+            notice = QDialog()
+            notice.setWindowTitle("Aviso")
+            notice_layout = QVBoxLayout()
+            notice.setLayout(notice_layout)
+            notice_label = QLabel("Ha llegado a la última pregunta.")
+            notice_layout.addWidget(notice_label)
+            #notice.resize(200,100)
+            notice.exec()
+
+    @QtCore.Slot()
+    def _end_test(self):
+        """Muestra la corrección del test en un diálogo."""
+        notice = QDialog()
+        notice.setWindowTitle("Corrección")
+        content_widget = QWidget()
+        content_layout = QVBoxLayout(content_widget)
+        content_widget.setLayout(content_layout)
+        title_label = QLabel("Corrección de las preguntas.")
+        content_layout.addWidget(title_label)
+        for i,question in enumerate(self.questions):
+            question_group = QGroupBox()
+            question_layout = QVBoxLayout()
+            question_group.setLayout(question_layout)
+            #Iteratively create question and options
+            question_layout.addWidget(QLabel(question['pregunta'], wordWrap=True))
+            option_button = ["a)","b)","c)","d)"] #Hardcoded for 4 options
+            for  j,option in enumerate(question['opciones']):
+                opt_button = QRadioButton(option_button[j], enabled=False, checked=True if self._question_layout.widget(i).findChildren(QRadioButton)[j].isChecked()==True else False)
+                opt_label = QLabel(option, wordWrap=True, )
+                if opt_label.text() == question['respuesta']:
+                    opt_label.setStyleSheet("background-color: green;")
+                    opt_button.setStyleSheet("background-color: green;")
+                else:
+                    opt_button.setStyleSheet("background-color: red;")
+                    opt_label.setStyleSheet("background-color: red;")
+                ly = QHBoxLayout()
+                ly.addWidget(opt_button,1)
+                ly.addWidget(opt_label,10)
+                question_layout.addLayout(ly)
+
+            question_layout.addWidget(QFrame(frameShape=QFrame.HLine))
+            question_layout.addWidget(QLabel(f"Referencia: {question['reference']}", wordWrap=True))
+            content_layout.addWidget(question_group)
+            print(f'Question Added {i}')
+
+        #Make scrollable
+        scroll_Area = QScrollArea()
+        scroll_Area.setWidgetResizable(True)
+        scroll_Area.setWidget(content_widget)
+        main_layout = QVBoxLayout(notice)
+        main_layout.addWidget(scroll_Area)
+
+        #Show and execute)
+        notice.show()
+        notice.exec()
 
 
 if __name__ == "__main__":
@@ -223,7 +261,7 @@ if __name__ == "__main__":
         "reference": "ANEXO I. Sección 1.ª Protección activa contra incendios. 4. Extintores de incendio. 1. En función de la carga, los extintores se clasifican de la siguiente forma: a) Extintor portátil: Diseñado para que puedan ser llevados y utilizados a mano, teniendo en condiciones de funcionamiento una masa igual o inferior a 20 kg."
     }
 ]
-    app = QApplication([])
+    app = QApplication(sys.argv)
 
     widget = TestSimu(qs)
     widget.resize(600, 600)

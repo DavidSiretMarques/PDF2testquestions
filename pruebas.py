@@ -99,7 +99,7 @@ class TestSimu(QMainWindow):
 
         # Diseño principal (Horizontal: Lista | Contenido)
         main_layout = QHBoxLayout(central_widget)
-        
+
         # QSplitter permite redimensionar los paneles arrastrando
         splitter = QSplitter(Qt.Orientation.Horizontal)
         main_layout.addWidget(splitter)
@@ -116,7 +116,6 @@ class TestSimu(QMainWindow):
     def _crear_panel_lista(self, parent_splitter):
         """Crea y configura el QListWidget para la navegación."""
         self.lista_preguntas = QListWidget()
-        self.lista_preguntas.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
         parent_splitter.addWidget(self.lista_preguntas)
 
         # Llenar la lista con los títulos
@@ -221,18 +220,7 @@ class TestSimu(QMainWindow):
     def _navegar_por_lista(self, fila):
         """Maneja la navegación al hacer clic en un elemento de la lista."""
         self._cargar_pregunta(fila)
-    
-    @QtCore.Slot()
-    def _anterior_pregunta(self):
-        """Va a la pregunta anterior si existe."""
-        if self.indice_actual > 0:
-            self._cargar_pregunta(self.indice_actual - 1)
-    
-    @QtCore.Slot()
-    def _siguiente_pregunta(self):
-        """Va a la siguiente pregunta si existe."""
-        if self.indice_actual < len(self.preguntas) - 1:
-            self._cargar_pregunta(self.indice_actual + 1)
+
     
     @QtCore.Slot()      
     def _finalizar_examen(self):

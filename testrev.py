@@ -6,6 +6,7 @@ from PySide6.QtWidgets import (QWidget, QMenuBar, QMenu, QGroupBox, QHBoxLayout,
 
 class TestRev(QWidget):
     def __init__(self, questions):
+        """Initializes the question review window with provided questions."""
         super().__init__()
         self.setWindowTitle("Revisión de preguntas")
         self.setWindowIcon(QtGui.QIcon('working.ico'))
@@ -21,57 +22,12 @@ class TestRev(QWidget):
         self.layout.addWidget(self._button_group_box,1,0)
 
         #Set button actions
-        self.buttoncorr.clicked.connect(self.corregir)
-        self.buttonnext.clicked.connect(self.next_question)
-        self.buttonprev.clicked.connect(self.prev_question)
-        self.buttonsave.clicked.connect(self.save_question)
-        self.buttondel.clicked.connect(self.delete_question)
+        self.buttoncorr.clicked.connect(self._corregir)
+        self.buttonnext.clicked.connect(self._next_question)
+        self.buttonprev.clicked.connect(self._prev_question)
+        self.buttonsave.clicked.connect(self._save_question)
+        self.buttondel.clicked.connect(self._delete_question)
         self.buttonfin.clicked.connect(self.close)
-
-    @QtCore.Slot()
-    def corregir(self):
-        for option in self._question_layout.currentWidget().findChildren(QRadioButton):
-            if option.text() == self.questions[self._question_layout.currentIndex()]['respuesta']:
-                option.setStyleSheet("color: green;")
-            else:
-                option.setStyleSheet("color: red;")
-        self._question_layout.currentWidget().findChildren(QLabel)[1].setText(f"Referencia: {self.questions[self._question_layout.currentIndex()]['reference']}")
-    
-    @QtCore.Slot()
-    def next_question(self):
-        if self._question_layout.currentIndex() < len(self.questions) - 1:
-            self._question_layout.setCurrentIndex(self._question_layout.currentIndex() + 1)
-        else:
-            notice = QDialog()
-            notice.setWindowTitle("Aviso")
-            notice_layout = QVBoxLayout()
-            notice.setLayout(notice_layout)
-            notice_label = QLabel("Ha llegado a la última pregunta.")
-            notice_layout.addWidget(notice_label)
-            notice.resize(200,100)
-            notice.exec()
-
-    @QtCore.Slot()
-    def prev_question(self):
-        if self._question_layout.currentIndex() > 0:
-            self._question_layout.setCurrentIndex(self._question_layout.currentIndex() - 1)
-        else:
-            notice = QDialog()
-            notice.setWindowTitle("Aviso")
-            notice_layout = QVBoxLayout()
-            notice.setLayout(notice_layout)
-            notice_label = QLabel("Ha llegado a la primera pregunta.")
-            notice_layout.addWidget(notice_label)
-            notice.resize(200,100)
-            notice.exec()
-    
-    @QtCore.Slot()
-    def save_question(self): #WIP
-        pass
-    
-    @QtCore.Slot()
-    def delete_question(self): #WIP
-        pass
 
     def create_menu(self): #WIP
         self._menu_bar = QMenuBar()
@@ -83,6 +39,7 @@ class TestRev(QWidget):
         self._exit_action.triggered.connect(self.accept)
 
     def create_questions(self):
+        """Creates the question layout, setting question, options and reference"""
         #Set Question layout
         self._question_layout = QStackedLayout()
         for question in self.questions:
@@ -97,7 +54,7 @@ class TestRev(QWidget):
             self._question_layout.addWidget(question_group)
 
     def create_button_group(self):
-        
+        """Creates the control buttons and sets their actions"""
         #create control buttons
         self.buttonprev = QPushButton("Anterior")
         self.buttonnext = QPushButton("Siguiente")
@@ -117,7 +74,59 @@ class TestRev(QWidget):
         layout.addWidget(self.buttonfin)
         layout.addWidget(self.buttonsave)
         layout.addWidget(self.buttondel)
-    
+
+    # Navigation Methods
+    @QtCore.Slot()
+    def _prev_question(self):
+        """Moves to the previous question in the layout. If there are no previous questions, shows a notice."""
+        if self._question_layout.currentIndex() > 0:
+            self._question_layout.setCurrentIndex(self._question_layout.currentIndex() - 1)
+        else:
+            notice = QDialog()
+            notice.setWindowTitle("Aviso")
+            notice_layout = QVBoxLayout()
+            notice.setLayout(notice_layout)
+            notice_label = QLabel("Ha llegado a la primera pregunta.")
+            notice_layout.addWidget(notice_label)
+            notice.resize(200,100)
+            notice.exec()
+
+    @QtCore.Slot()
+    def _next_question(self):
+        """Moves to the next question in the layout. If there are no more questions, shows a notice."""
+        if self._question_layout.currentIndex() < len(self.questions) - 1:
+            self._question_layout.setCurrentIndex(self._question_layout.currentIndex() + 1)
+        else:
+            notice = QDialog()
+            notice.setWindowTitle("Aviso")
+            notice_layout = QVBoxLayout()
+            notice.setLayout(notice_layout)
+            notice_label = QLabel("Ha llegado a la última pregunta.")
+            notice_layout.addWidget(notice_label)
+            notice.resize(200,100)
+            notice.exec()
+
+    @QtCore.Slot()
+    def _corregir(self):
+        """Sets the colors of the options to indicate correct and incorrect answers, and shows reference."""
+        for option in self._question_layout.currentWidget().findChildren(QRadioButton):
+            if option.text() == self.questions[self._question_layout.currentIndex()]['respuesta']:
+                option.setStyleSheet("color: green;")
+            else:
+                option.setStyleSheet("color: red;")
+        self._question_layout.currentWidget().findChildren(QLabel)[1].setText(f"Referencia: {self.questions[self._question_layout.currentIndex()]['reference']}")
+
+    #Saving question Methods
+    @QtCore.Slot()
+    def _save_question(self): #WIP
+        """Saves the current question to a file or database. (WIP)"""
+        pass
+
+    @QtCore.Slot()
+    def _delete_question(self): #WIP
+        """Deletes the current question. (WIP)"""
+        pass
+
 if __name__ == "__main__":
     qs = [
     {
