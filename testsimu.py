@@ -24,9 +24,9 @@ class TestSimu(QWidget):
         #main_layout.addWidget(splitter)
 
         #Set question list, question and button layout
-        #self._create_question_list(splitter)
-        self.create_questions()
-        self.create_button_group()
+        self._create_question_list(splitter)
+        self._create_questions()
+        self._create_button_group()
 
         #Add everything to layout
         self.layout = QGridLayout(self)
@@ -40,7 +40,7 @@ class TestSimu(QWidget):
         self.buttonfin.clicked.connect(self._end_test)
 
 
-    def create_menu(self): #WIP
+    def _create_menu(self): #WIP
         self._menu_bar = QMenuBar()
 
         self._file_menu = QMenu("&File", self)
@@ -49,10 +49,10 @@ class TestSimu(QWidget):
 
         self._exit_action.triggered.connect(self.accept)
 
-    def create_questions(self):
+    def _create_questions(self):
         #Set Question layout
         self._question_layout = QStackedLayout()
-        opciones = ["a)","b)","c)","d)"] #Hardcoded for 4 options
+        #opciones = ["a)","b)","c)","d)"] #Hardcoded for 4 options
         #Iteratively create question and options
         for question in self.questions:
             question_group = QGroupBox()
@@ -60,19 +60,25 @@ class TestSimu(QWidget):
             question_group.setLayout(question_layout)
             question_layout.addWidget(QLabel(question['pregunta'], wordWrap=True))
             #Create options
+            [question_layout.addWidget(QRadioButton(opcion)) for opcion in question['opciones']]
+            #Set wordWrap in the Radiobutton (WIP)
+            """opt_button = [None for option in question['opciones']]
+            opt_label = [None for option in question['opciones']]
             for j,option in enumerate(question['opciones']):
-                opt_button = QRadioButton(opciones[j])
-                opt_label = QLabel(option, wordWrap=True)
+                opt_button[j] = QRadioButton(opciones[j])
+                opt_label[j] = QLabel(option, wordWrap=True)
+                opt_label[j].setBuddy(opt_button[j])
+                print(opt_label[j].buddy)
                 ly = QHBoxLayout()
                 ly.setSpacing(0)
-                ly.addWidget(opt_button,1)
-                ly.addWidget(opt_label,10)
-                question_layout.addLayout(ly)
+                ly.addWidget(opt_button[j],1)
+                ly.addWidget(opt_label[j],10)
+                question_layout.addLayout(ly)"""
             question_layout.addWidget(QFrame(frameShape=QFrame.HLine))
             question_layout.addWidget(QLabel("Referencia:", wordWrap=True))
             self._question_layout.addWidget(question_group)
 
-    def create_button_group(self):
+    def _create_button_group(self):
 
         #create control buttons
         self.buttonprev = QPushButton("Anterior")
@@ -88,8 +94,8 @@ class TestSimu(QWidget):
         layout.addWidget(self.buttonnext)
         layout.addWidget(self.buttonfin)
 
-    """def _create_question_list(self, parent_splitter):
-        """"Crea y configura el QListWidget para la navegación.""""
+    def _create_question_list(self, parent_splitter):
+        """Crea y configura el QListWidget para la navegación."""
         self.lista_preguntas = QListWidget()
         self.lista_preguntas.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
         parent_splitter.addWidget(self.lista_preguntas)
@@ -99,8 +105,8 @@ class TestSimu(QWidget):
             self.lista_preguntas.addItem(f"Pregunta {i+1}")
 
         # Conectar el clic de la lista al método de navegación
-        #self.lista_preguntas.currentRowChanged.connect(self._navegar_por_lista)
-    """
+        self.lista_preguntas.currentRowChanged.connect(self._list_navigation)
+    
     
     #Navigation methods
     @QtCore.Slot()
@@ -173,7 +179,6 @@ class TestSimu(QWidget):
             question_layout.addWidget(QFrame(frameShape=QFrame.HLine))
             question_layout.addWidget(QLabel(f"Referencia: {question['reference']}", wordWrap=True))
             content_layout.addWidget(question_group)
-            print(f'Question Added {i}')
 
         #Make scrollable
         scroll_Area = QScrollArea()
