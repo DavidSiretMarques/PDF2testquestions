@@ -1,8 +1,9 @@
 import sys
 from PySide6 import QtCore, QtGui
-from PySide6.QtWidgets import (QWidget, QMenuBar, QMenu, QGroupBox, QHBoxLayout, QRadioButton,
+from PySide6.QtWidgets import (QWidget, QMenuBar, QMenu, QGroupBox, QHBoxLayout,
                                QPushButton, QLabel, QVBoxLayout, QGridLayout, QApplication, QFrame,
                                QStackedLayout, QDialog)
+from MyWidgets import WrappedRadioButton
 
 class TestRev(QWidget):
     def __init__(self, questions):
@@ -48,7 +49,7 @@ class TestRev(QWidget):
             question_group.setLayout(question_layout)
             #Iteratively create question and options
             question_layout.addWidget(QLabel(question['pregunta'], wordWrap=True))
-            [question_layout.addWidget(QRadioButton(opcion)) for opcion in question['opciones']]
+            [question_layout.addWidget(WrappedRadioButton(opcion)) for opcion in question['opciones']]
             question_layout.addWidget(QFrame(frameShape=QFrame.HLine))
             question_layout.addWidget(QLabel("Referencia:", wordWrap=True))
             self._question_layout.addWidget(question_group)
@@ -109,8 +110,8 @@ class TestRev(QWidget):
     @QtCore.Slot()
     def _corregir(self):
         """Sets the colors of the options to indicate correct and incorrect answers, and shows reference."""
-        for option in self._question_layout.currentWidget().findChildren(QRadioButton):
-            if option.text() == self.questions[self._question_layout.currentIndex()]['respuesta']:
+        for option in self._question_layout.currentWidget().findChildren(WrappedRadioButton):
+            if option.label.text() == self.questions[self._question_layout.currentIndex()]['respuesta']:
                 option.setStyleSheet("color: green;")
             else:
                 option.setStyleSheet("color: red;")

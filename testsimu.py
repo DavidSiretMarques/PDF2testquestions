@@ -4,6 +4,7 @@ from PySide6.QtWidgets import (QWidget, QMenuBar, QMenu, QGroupBox, QHBoxLayout,
                                QPushButton, QLabel, QVBoxLayout, QGridLayout, QApplication, QFrame,
                                QStackedLayout, QSplitter, QDialog, QScrollArea, QMainWindow,
                                QListWidget, QSizePolicy)
+from MyWidgets import WrappedRadioButton
 
 class TestSimu(QWidget):
     def __init__(self, questions):
@@ -11,18 +12,9 @@ class TestSimu(QWidget):
         self.setWindowTitle("Simulacro")
         self.setWindowIcon(QtGui.QIcon('exam.ico'))
         self.questions = questions
-
-        # --- Widget Central Contenedor ---
-        #central_widget = QWidget()
-        #self.setCentralWidget(central_widget)
-
-        # Diseño principal (Horizontal: Lista | Contenido)
-        #main_layout = QHBoxLayout(central_widget)
-
         # QSplitter permite redimensionar los paneles arrastrando
         splitter = QSplitter(QtCore.Qt.Orientation.Horizontal)
-        #main_layout.addWidget(splitter)
-
+        
         #Set question list, question and button layout
         self._create_question_list(splitter)
         self._create_questions()
@@ -60,7 +52,7 @@ class TestSimu(QWidget):
             question_group.setLayout(question_layout)
             question_layout.addWidget(QLabel(question['pregunta'], wordWrap=True))
             #Create options
-            [question_layout.addWidget(QRadioButton(opcion)) for opcion in question['opciones']]
+            [question_layout.addWidget(WrappedRadioButton(opcion)) for opcion in question['opciones']]
             #Set wordWrap in the Radiobutton (WIP)
             """opt_button = [None for option in question['opciones']]
             opt_label = [None for option in question['opciones']]
@@ -106,8 +98,7 @@ class TestSimu(QWidget):
 
         # Conectar el clic de la lista al método de navegación
         self.lista_preguntas.currentRowChanged.connect(self._list_navigation)
-    
-    
+
     #Navigation methods
     @QtCore.Slot()
     def _list_navigation(self, index):
