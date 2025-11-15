@@ -3,8 +3,7 @@ from PySide6 import QtCore, QtGui
 from PySide6.QtWidgets import (QWidget, QMenuBar, QMenu, QGroupBox, QHBoxLayout, QRadioButton,
                                QPushButton, QLabel, QVBoxLayout, QGridLayout, QApplication, QFrame,
                                QStackedLayout, QSplitter, QDialog, QScrollArea, QMainWindow,
-                               QListWidget, QSizePolicy)
-from MyWidgets import WrappedRadioButton
+                               QListWidget, QSizePolicy, QButtonGroup)
 
 class TestSimu(QWidget):
     def __init__(self, questions):
@@ -51,8 +50,9 @@ class TestSimu(QWidget):
             question_layout = QVBoxLayout()
             question_group.setLayout(question_layout)
             question_layout.addWidget(QLabel(question['pregunta'], wordWrap=True))
-            #Create options
-            [question_layout.addWidget(WrappedRadioButton(opcion)) for opcion in question['opciones']]
+            question_layout.addSpacing(100)
+            #Create options with button group for mutual exclusion
+            [question_layout.addWidget(QRadioButton(opcion)) for opcion in question['opciones']]
             #Set wordWrap in the Radiobutton (WIP)
             """opt_button = [None for option in question['opciones']]
             opt_label = [None for option in question['opciones']]
@@ -66,8 +66,7 @@ class TestSimu(QWidget):
                 ly.addWidget(opt_button[j],1)
                 ly.addWidget(opt_label[j],10)
                 question_layout.addLayout(ly)"""
-            question_layout.addWidget(QFrame(frameShape=QFrame.HLine))
-            question_layout.addWidget(QLabel("Referencia:", wordWrap=True))
+            question_layout.addStretch()
             self._question_layout.addWidget(question_group)
 
     def _create_button_group(self):
