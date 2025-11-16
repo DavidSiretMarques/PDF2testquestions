@@ -2,8 +2,7 @@ import sys
 from PySide6 import QtCore, QtGui
 from PySide6.QtWidgets import (QWidget, QMenuBar, QMenu, QGroupBox, QHBoxLayout, QRadioButton,
                                QPushButton, QLabel, QVBoxLayout, QGridLayout, QApplication, QFrame,
-                               QStackedLayout, QSplitter, QDialog, QScrollArea, QMainWindow,
-                               QListWidget, QSizePolicy, QButtonGroup)
+                               QStackedLayout, QDialog, QScrollArea, QListWidget, QSizePolicy)
 
 class TestSimu(QWidget):
     def __init__(self, questions):
@@ -78,7 +77,7 @@ class TestSimu(QWidget):
 
     def _create_question_list(self):
         """Crea y configura el QListWidget para la navegación."""
-        self._question_list_layout = QVBoxLayout()        
+        self._question_list_layout = QVBoxLayout()
         self._question_list = QListWidget()
         self._question_list.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
 

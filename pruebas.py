@@ -1,8 +1,8 @@
 import sys
 from PySide6 import QtCore, QtGui
 from PySide6.QtWidgets import (QWidget, QGroupBox, QHBoxLayout, QRadioButton,
-                               QPushButton, QLabel, QVBoxLayout, QGridLayout, QApplication, QFrame,
-                               QStackedLayout, QDialog)
+                               QPushButton, QLabel, QVBoxLayout, QGridLayout,
+                               QApplication, QFrame, QStackedLayout, QDialog)
 
 
 class TestRev(QWidget):
