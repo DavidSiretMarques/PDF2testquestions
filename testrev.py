@@ -14,8 +14,8 @@ class TestRev(QWidget):
         self.questions = questions
 
         #Set question and button layout
-        self.create_questions()
-        self.create_button_group()
+        self._create_questions()
+        self._create_button_group()
 
         #Add everything to layout
         self.layout = QGridLayout(self)
@@ -30,7 +30,7 @@ class TestRev(QWidget):
         self.buttondel.clicked.connect(self._delete_question)
         self.buttonfin.clicked.connect(self.close)
 
-    def create_menu(self): #WIP
+    def _create_menu(self): #WIP
         self._menu_bar = QMenuBar()
 
         self._file_menu = QMenu("&File", self)
@@ -39,7 +39,7 @@ class TestRev(QWidget):
 
         self._exit_action.triggered.connect(self.accept)
 
-    def create_questions(self):
+    def _create_questions(self):
         """Creates the question layout, setting question, options and reference"""
         #Set Question layout
         self._question_layout = QStackedLayout()
@@ -52,9 +52,12 @@ class TestRev(QWidget):
             [question_layout.addWidget(QRadioButton(opcion)) for opcion in question['opciones']]
             question_layout.addWidget(QFrame(frameShape=QFrame.HLine))
             question_layout.addWidget(QLabel("Referencia:", wordWrap=True))
+            cleanbutton = QPushButton("Limpiar Pregunta")
+            question_layout.addWidget(cleanbutton)
+            cleanbutton.clicked.connect(self._clean_question)
             self._question_layout.addWidget(question_group)
 
-    def create_button_group(self):
+    def _create_button_group(self):
         """Creates the control buttons and sets their actions"""
         #create control buttons
         self.buttonprev = QPushButton("Anterior")
@@ -118,6 +121,14 @@ class TestRev(QWidget):
                 option.setStyleSheet("color: red;")
         self._question_layout.currentWidget().findChildren(QLabel)[1].setText(f"Referencia: {self.questions[self._question_layout.currentIndex()]['reference']}")
 
+    @QtCore.Slot()
+    def _clean_question(self):
+        for option in self._question_layout.currentWidget().findChildren(QRadioButton):
+            if option.isChecked():
+                option.setAutoExclusive(False)
+                option.setChecked(False)
+                option.setAutoExclusive(True)
+        
     #Saving question Methods
     @QtCore.Slot()
     def _save_question(self): #WIP

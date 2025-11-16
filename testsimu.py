@@ -30,7 +30,6 @@ class TestSimu(QWidget):
         self.buttonprev.clicked.connect(self._prev_question)
         self.buttonfin.clicked.connect(self._end_test)
 
-
     def _create_menu(self): #WIP
         self._menu_bar = QMenuBar()
 
@@ -67,6 +66,9 @@ class TestSimu(QWidget):
                 ly.addWidget(opt_label[j],10)
                 question_layout.addLayout(ly)"""
             question_layout.addStretch()
+            cleanbutton = QPushButton("Limpiar Pregunta")
+            question_layout.addWidget(cleanbutton)
+            cleanbutton.clicked.connect(self._clean_question)
             self._question_layout.addWidget(question_group)
 
     def _create_button_group(self):
@@ -134,6 +136,14 @@ class TestSimu(QWidget):
             notice_layout.addWidget(notice_label)
             #notice.resize(200,100)
             notice.exec()
+
+    @QtCore.Slot()
+    def _clean_question(self):
+        for option in self._question_layout.currentWidget().findChildren(QRadioButton):
+            if option.isChecked():
+                option.setAutoExclusive(False)
+                option.setChecked(False)
+                option.setAutoExclusive(True)
 
     @QtCore.Slot()
     def _end_test(self):
