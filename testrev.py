@@ -24,7 +24,6 @@ class TestRev(QWidget):
         self.layout.addLayout(self._question_list_layout, 0, 0)
         self.layout.addLayout(self._question_layout,0,1)
         self.layout.addWidget(self._button_group_box,1,1)
-        
 
         #Set button actions
         self.buttoncorr.clicked.connect(self._corregir)
@@ -97,9 +96,8 @@ class TestRev(QWidget):
         for i in range(len(self.questions)):
             self._question_list.addItem(f"Pregunta {i+1}")
 
-        self._progress = QProgressBar()
-        self._question_list_layout.addWidget(self._progress)
-        self._question_list_layout.addWidget(QLabel(f'{self.answered_questions}/{len(self.questions)}'))
+        self._progress_label = QLabel(f'{self.answered_questions}/{len(self.questions)} Respondidas')
+        self._question_list_layout.addWidget(self._progress_label)
         self._question_list_layout.addWidget(self._question_list)
 
         # Conectar el clic de la lista al método de navegación
@@ -164,15 +162,10 @@ class TestRev(QWidget):
                 self._update_progress(-1)
 
     @QtCore.Slot()
-    def _update_progress(self, progress): #WIP
-        pass
-        """for i in range(self._question_layout.count()):
-        #    radiobuttons = self._question_layout.widget(i).findChildren(QRadioButton)
-            answered = [[rb.isChecked() for rb in radiobuttons] for radiobuttons in self._question_layout.widget(i).findChildren(QRadioButton)]
-            print(answered.count(True))"""
-
-        #self.answered_questions = self.answered_questions + progress
-        #print(self.answered_questions)
+    def _update_progress(self, progress):
+        """Set the label to show the number of answered questions"""
+        self.answered_questions += progress
+        self._progress_label.setText(f'{self.answered_questions}/{len(self.questions)} Respondidas')
 
     #Saving question Methods
     @QtCore.Slot()

@@ -12,6 +12,7 @@ class TestSimu(QWidget):
         self.setWindowTitle("Simulacro")
         self.setWindowIcon(QtGui.QIcon('exam.ico'))
         self.questions = questions
+        self.answered_questions = 0
         #Set question list, question and button layout
         self._create_question_list()
         self._create_questions()
@@ -19,7 +20,7 @@ class TestSimu(QWidget):
 
         #Add everything to layout
         self.layout = QGridLayout(self)
-        self.layout.addWidget(self._question_list, 0, 0)
+        self.layout.addLayout(self._question_list_layout, 0, 0)
         self.layout.addLayout(self._question_layout,0,1)
         self.layout.addWidget(self._button_group_box,1,1)
 
@@ -48,8 +49,12 @@ class TestSimu(QWidget):
             question_group.setLayout(question_layout)
             question_layout.addWidget(QLabel(question['pregunta'], wordWrap=True))
             question_layout.addSpacing(100)
-            [question_layout.addWidget(QRadioButton(opcion)) for opcion in question['opciones']]
+            #[question_layout.addWidget(QRadioButton(opcion)) for opcion in question['opciones']]
             #question_layout.addStretch()
+            for opcion in question['opciones']:
+                radiobutton = QRadioButton(opcion)
+                radiobutton.clicked.connect(self._update_progress)
+                question_layout.addWidget(radiobutton)
             cleanbutton = QPushButton("Limpiar Pregunta")
             question_layout.addWidget(cleanbutton)
             cleanbutton.clicked.connect(self._clean_question)
@@ -73,13 +78,17 @@ class TestSimu(QWidget):
 
     def _create_question_list(self):
         """Crea y configura el QListWidget para la navegación."""
+        self._question_list_layout = QVBoxLayout()        
         self._question_list = QListWidget()
         self._question_list.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
 
         # Llenar la lista con los títulos
         for i in range(len(self.questions)):
             self._question_list.addItem(f"Pregunta {i+1}")
-                
+
+        self._progress_label = QLabel(f'{self.answered_questions}/{len(self.questions)} Respondidas')
+        self._question_list_layout.addWidget(self._progress_label)
+        self._question_list_layout.addWidget(self._question_list)
 
         # Conectar el clic de la lista al método de navegación
         self._question_list.currentRowChanged.connect(self._list_navigation)
@@ -129,6 +138,13 @@ class TestSimu(QWidget):
                 option.setAutoExclusive(False)
                 option.setChecked(False)
                 option.setAutoExclusive(True)
+                self._update_progress(-1)
+
+    @QtCore.Slot()
+    def _update_progress(self, progress):
+        """Set the label to show the number of answered questions"""
+        self.answered_questions += progress
+        self._progress_label.setText(f'{self.answered_questions}/{len(self.questions)} Respondidas')
 
     @QtCore.Slot()
     def _end_test(self):
