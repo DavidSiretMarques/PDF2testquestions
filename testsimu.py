@@ -7,21 +7,19 @@ from PySide6.QtWidgets import (QWidget, QMenuBar, QMenu, QGroupBox, QHBoxLayout,
 
 class TestSimu(QWidget):
     def __init__(self, questions):
+        """Initializes the Simulacrum Test with provided questions"""
         super().__init__()
         self.setWindowTitle("Simulacro")
         self.setWindowIcon(QtGui.QIcon('exam.ico'))
         self.questions = questions
-        # QSplitter permite redimensionar los paneles arrastrando
-        splitter = QSplitter(QtCore.Qt.Orientation.Horizontal)
-        
         #Set question list, question and button layout
-        self._create_question_list(splitter)
+        self._create_question_list()
         self._create_questions()
         self._create_button_group()
 
         #Add everything to layout
         self.layout = QGridLayout(self)
-        self.layout.addWidget(splitter)
+        self.layout.addWidget(self._question_list, 0, 0)
         self.layout.addLayout(self._question_layout,0,1)
         self.layout.addWidget(self._button_group_box,1,1)
 
@@ -40,9 +38,9 @@ class TestSimu(QWidget):
         self._exit_action.triggered.connect(self.accept)
 
     def _create_questions(self):
+        """Creates the question layout, setting question, options and reference"""
         #Set Question layout
         self._question_layout = QStackedLayout()
-        #opciones = ["a)","b)","c)","d)"] #Hardcoded for 4 options
         #Iteratively create question and options
         for question in self.questions:
             question_group = QGroupBox()
@@ -50,29 +48,15 @@ class TestSimu(QWidget):
             question_group.setLayout(question_layout)
             question_layout.addWidget(QLabel(question['pregunta'], wordWrap=True))
             question_layout.addSpacing(100)
-            #Create options with button group for mutual exclusion
             [question_layout.addWidget(QRadioButton(opcion)) for opcion in question['opciones']]
-            #Set wordWrap in the Radiobutton (WIP)
-            """opt_button = [None for option in question['opciones']]
-            opt_label = [None for option in question['opciones']]
-            for j,option in enumerate(question['opciones']):
-                opt_button[j] = QRadioButton(opciones[j])
-                opt_label[j] = QLabel(option, wordWrap=True)
-                opt_label[j].setBuddy(opt_button[j])
-                print(opt_label[j].buddy)
-                ly = QHBoxLayout()
-                ly.setSpacing(0)
-                ly.addWidget(opt_button[j],1)
-                ly.addWidget(opt_label[j],10)
-                question_layout.addLayout(ly)"""
-            question_layout.addStretch()
+            #question_layout.addStretch()
             cleanbutton = QPushButton("Limpiar Pregunta")
             question_layout.addWidget(cleanbutton)
             cleanbutton.clicked.connect(self._clean_question)
             self._question_layout.addWidget(question_group)
 
     def _create_button_group(self):
-
+        """Creates the control buttons and sets their actions"""
         #create control buttons
         self.buttonprev = QPushButton("Anterior")
         self.buttonnext = QPushButton("Siguiente")
@@ -87,18 +71,18 @@ class TestSimu(QWidget):
         layout.addWidget(self.buttonnext)
         layout.addWidget(self.buttonfin)
 
-    def _create_question_list(self, parent_splitter):
+    def _create_question_list(self):
         """Crea y configura el QListWidget para la navegación."""
-        self.lista_preguntas = QListWidget()
-        self.lista_preguntas.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
-        parent_splitter.addWidget(self.lista_preguntas)
+        self._question_list = QListWidget()
+        self._question_list.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
 
         # Llenar la lista con los títulos
         for i in range(len(self.questions)):
-            self.lista_preguntas.addItem(f"Pregunta {i+1}")
+            self._question_list.addItem(f"Pregunta {i+1}")
+                
 
         # Conectar el clic de la lista al método de navegación
-        self.lista_preguntas.currentRowChanged.connect(self._list_navigation)
+        self._question_list.currentRowChanged.connect(self._list_navigation)
 
     #Navigation methods
     @QtCore.Slot()
@@ -139,6 +123,7 @@ class TestSimu(QWidget):
 
     @QtCore.Slot()
     def _clean_question(self):
+        """Cleans selected option in the question to make it unanswered"""
         for option in self._question_layout.currentWidget().findChildren(QRadioButton):
             if option.isChecked():
                 option.setAutoExclusive(False)

@@ -1,72 +1,45 @@
 import sys
-from PySide6.QtWidgets import (
-    QApplication, QWidget, QVBoxLayout, QHBoxLayout, 
-    QRadioButton, QGroupBox, QSizePolicy, 
-    QLabel
-)
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtWidgets import QApplication, QWidget, QLabel, QProgressBar, QPushButton, QVBoxLayout, QFormLayout
 
-# --- CLASE PERSONALIZADA ---
-class ClickableLabel(QLabel):
-    """QLabel que emite una señal al ser clickeada."""
-    clicked = Signal()
+# Slot function to handle button click
+def on_submit():
+    value = progress_bar.value()
+    print(f'Progress Bar Value: {value}')
 
-    def mousePressEvent(self, event):
-        if event.button() == Qt.LeftButton:
-            self.clicked.emit()
-        super().mousePressEvent(event)
-# ----------------------------------------------------
-class QRadioButtonW(QRadioButton):
-    pass
+# Create an instance of QApplication
+app = QApplication(sys.argv)
 
-class ManualConnectDemo(QWidget):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("Demo de Clic Manual para RadioButton (Corregido)")
-        self.setGeometry(200, 200, 550, 200)
-        
-        main_layout = QVBoxLayout(self)
-        
-        grupo = QGroupBox("Opciones con Conexión Manual de Eventos")
-        grupo_layout = QVBoxLayout(grupo)
-        
-        # --- Creación de la Fila (La Solución Funcional) ---
-        
-        fila_layout = QHBoxLayout()
-        fila_layout.setSpacing(0) 
-        
-        self.radio_btn = QRadioButton()
-        
-        # Usar nuestra ClickableLabel personalizada
-        self.etiqueta_clickeable = ClickableLabel("Opción 1: ¡Haz clic aquí! (Conexión Manual)")
-        self.etiqueta_clickeable.setWordWrap(True)
-        
-        # Retroalimentación visual
-        self.etiqueta_clickeable.setCursor(Qt.PointingHandCursor)
-        
-        # CONECTAR la señal 'clicked' de la etiqueta al método 'click' del botón
-        self.etiqueta_clickeable.clicked.connect(self.radio_btn.click)
-        
-        # 3. Añadir al layout horizontal
-        fila_layout.addWidget(self.radio_btn)
-        fila_layout.addWidget(self.etiqueta_clickeable)
-        fila_layout.addStretch()
-        
-        grupo_layout.addLayout(fila_layout)
-        
-        # --- Fila 2 (Normal) ---
-        
-        fila_layout_normal = QHBoxLayout()
-        fila_layout_normal.addWidget(QRadioButton())
-        fila_layout_normal.addWidget(QLabel("Opción 2: Solo funciona el clic en el círculo (Comparación)", wordWrap=True))
-        fila_layout_normal.addStretch()
-        grupo_layout.addLayout(fila_layout_normal)
+# Create a QWidget instance (main window)
+window = QWidget()
+window.setWindowTitle('Form with QProgressBar Example')
+window.setGeometry(100, 100, 400, 300)
 
-        main_layout.addWidget(grupo)
+# Create a QFormLayout instance
+form_layout = QFormLayout()
 
+# Create QLabel and QProgressBar instances
+label = QLabel('Task Progress:')
+progress_bar = QProgressBar()
+progress_bar.setRange(0, 100)  # Set the range of values
+progress_bar.setValue(50)      # Set the initial value
 
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = ManualConnectDemo()
-    window.show()
-    sys.exit(app.exec())
+# Add widgets to the form layout
+form_layout.addRow(label, progress_bar)
+
+# Create a QPushButton for submitting the form
+submit_button = QPushButton('Submit')
+submit_button.clicked.connect(on_submit)
+
+# Create a QVBoxLayout to combine the form layout and submit button
+main_layout = QVBoxLayout()
+main_layout.addLayout(form_layout)
+main_layout.addWidget(submit_button)
+
+# Set the layout for the main window
+window.setLayout(main_layout)
+
+# Show the main window
+window.show()
+
+# Run the application's event loop
+sys.exit(app.exec())

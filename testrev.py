@@ -2,7 +2,7 @@ import sys
 from PySide6 import QtCore, QtGui
 from PySide6.QtWidgets import (QWidget, QMenuBar, QMenu, QGroupBox, QHBoxLayout, QRadioButton,
                                QPushButton, QLabel, QVBoxLayout, QGridLayout, QApplication, QFrame,
-                               QStackedLayout, QDialog)
+                               QStackedLayout, QDialog, QListWidget,QSizePolicy, QProgressBar)
 
 
 class TestRev(QWidget):
@@ -12,15 +12,19 @@ class TestRev(QWidget):
         self.setWindowTitle("Revisión de preguntas")
         self.setWindowIcon(QtGui.QIcon('working.ico'))
         self.questions = questions
+        self.answered_questions = 0
 
-        #Set question and button layout
+        #Set question list, question and button layout
+        self._create_question_list()
         self._create_questions()
         self._create_button_group()
 
         #Add everything to layout
         self.layout = QGridLayout(self)
-        self.layout.addLayout(self._question_layout,0,0)
-        self.layout.addWidget(self._button_group_box,1,0)
+        self.layout.addLayout(self._question_list_layout, 0, 0)
+        self.layout.addLayout(self._question_layout,0,1)
+        self.layout.addWidget(self._button_group_box,1,1)
+        
 
         #Set button actions
         self.buttoncorr.clicked.connect(self._corregir)
@@ -43,13 +47,17 @@ class TestRev(QWidget):
         """Creates the question layout, setting question, options and reference"""
         #Set Question layout
         self._question_layout = QStackedLayout()
+        #Iteratively create question and options
         for question in self.questions:
             question_group = QGroupBox()
             question_layout = QVBoxLayout()
             question_group.setLayout(question_layout)
-            #Iteratively create question and options
             question_layout.addWidget(QLabel(question['pregunta'], wordWrap=True))
-            [question_layout.addWidget(QRadioButton(opcion)) for opcion in question['opciones']]
+            #[question_layout.addWidget(QRadioButton(opcion)) for opcion in question['opciones']]
+            for opcion in question['opciones']:
+                radiobutton = QRadioButton(opcion)
+                radiobutton.clicked.connect(self._update_progress)
+                question_layout.addWidget(radiobutton)
             question_layout.addWidget(QFrame(frameShape=QFrame.HLine))
             question_layout.addWidget(QLabel("Referencia:", wordWrap=True))
             cleanbutton = QPushButton("Limpiar Pregunta")
@@ -78,6 +86,24 @@ class TestRev(QWidget):
         layout.addWidget(self.buttonfin)
         layout.addWidget(self.buttonsave)
         layout.addWidget(self.buttondel)
+
+    def _create_question_list(self):
+        """Crea y configura el QListWidget para la navegación."""
+        self._question_list_layout = QVBoxLayout()        
+        self._question_list = QListWidget()
+        self._question_list.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
+
+        # Llenar la lista con los títulos
+        for i in range(len(self.questions)):
+            self._question_list.addItem(f"Pregunta {i+1}")
+
+        self._progress = QProgressBar()
+        self._question_list_layout.addWidget(self._progress)
+        self._question_list_layout.addWidget(QLabel(f'{self.answered_questions}/{len(self.questions)}'))
+        self._question_list_layout.addWidget(self._question_list)
+
+        # Conectar el clic de la lista al método de navegación
+        self._question_list.currentRowChanged.connect(self._list_navigation)
 
     # Navigation Methods
     @QtCore.Slot()
@@ -111,10 +137,16 @@ class TestRev(QWidget):
             notice.exec()
 
     @QtCore.Slot()
+    def _list_navigation(self, index):
+        """Navega a la pregunta seleccionada en la lista."""
+        if 0 <= index < len(self.questions):
+            self._question_layout.setCurrentIndex(index)
+
+    #Checking and cleaning methods
+    @QtCore.Slot()
     def _corregir(self):
         """Sets the colors of the options to indicate correct and incorrect answers, and shows reference."""
         for option in self._question_layout.currentWidget().findChildren(QRadioButton):
-            print(f'{option.text()} \nVS\n{self.questions[self._question_layout.currentIndex()]["respuesta"]}')
             if option.text() == self.questions[self._question_layout.currentIndex()]['respuesta']:
                 option.setStyleSheet("color: green;")
             else:
@@ -123,12 +155,25 @@ class TestRev(QWidget):
 
     @QtCore.Slot()
     def _clean_question(self):
+        """Cleans selected option in the question to make it unanswered"""
         for option in self._question_layout.currentWidget().findChildren(QRadioButton):
             if option.isChecked():
                 option.setAutoExclusive(False)
                 option.setChecked(False)
                 option.setAutoExclusive(True)
-        
+                self._update_progress(-1)
+
+    @QtCore.Slot()
+    def _update_progress(self, progress): #WIP
+        pass
+        """for i in range(self._question_layout.count()):
+        #    radiobuttons = self._question_layout.widget(i).findChildren(QRadioButton)
+            answered = [[rb.isChecked() for rb in radiobuttons] for radiobuttons in self._question_layout.widget(i).findChildren(QRadioButton)]
+            print(answered.count(True))"""
+
+        #self.answered_questions = self.answered_questions + progress
+        #print(self.answered_questions)
+
     #Saving question Methods
     @QtCore.Slot()
     def _save_question(self): #WIP
