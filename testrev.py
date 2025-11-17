@@ -12,7 +12,7 @@ class TestRev(QWidget):
         self.setWindowTitle("Revisión de preguntas")
         self.setWindowIcon(QtGui.QIcon('working.ico'))
         self.questions = questions
-        self.answered_questions = 0
+        self.answered_questions = {i:None for i in range(len(self.questions))}
 
         #Set question list, question and button layout
         self._create_question_list()
@@ -96,7 +96,7 @@ class TestRev(QWidget):
         for i in range(len(self.questions)):
             self._question_list.addItem(f"Pregunta {i+1}")
 
-        self._progress_label = QLabel(f'{self.answered_questions}/{len(self.questions)} Respondidas')
+        self._progress_label = QLabel(f'{0}/{len(self.questions)} Respondidas')
         self._question_list_layout.addWidget(self._progress_label)
         self._question_list_layout.addWidget(self._question_list)
 
@@ -150,7 +150,7 @@ class TestRev(QWidget):
             else:
                 option.setStyleSheet("color: red;")
         self._question_layout.currentWidget().findChildren(QLabel)[1].setText(f"Referencia: {self.questions[self._question_layout.currentIndex()]['reference']}")
-
+    
     @QtCore.Slot()
     def _clean_question(self):
         """Cleans selected option in the question to make it unanswered"""
@@ -159,13 +159,14 @@ class TestRev(QWidget):
                 option.setAutoExclusive(False)
                 option.setChecked(False)
                 option.setAutoExclusive(True)
-                self._update_progress(-1)
+                self._update_progress(False)
 
     @QtCore.Slot()
     def _update_progress(self, progress):
         """Set the label to show the number of answered questions"""
-        self.answered_questions += progress
-        self._progress_label.setText(f'{self.answered_questions}/{len(self.questions)} Respondidas')
+        self.answered_questions[self._question_layout.currentIndex()] = progress
+        answered_questions = sum(1 for condition in self.answered_questions.values() if condition) # replicating answered question values. 
+        self._progress_label.setText(f'{answered_questions}/{len(self.questions)} Respondidas')
 
     #Saving question Methods
     @QtCore.Slot()

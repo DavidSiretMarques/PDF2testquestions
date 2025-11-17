@@ -12,8 +12,8 @@ class TestRev(QWidget):
         self.setWindowTitle("Revisión de preguntas")
         self.setWindowIcon(QtGui.QIcon('working.ico'))
         self.questions = questions
-        self.answered_questions = 0
-        self._progress_label = QLabel(f'{self.answered_questions}/{len(self.questions)} Respondidas')
+        self.answered_questions = {}
+        self._progress_label = QLabel(f'{0}/{len(self.questions)} Respondidas')
 
         #Set question list, question and button layout
         self._create_questions()
@@ -108,13 +108,14 @@ class TestRev(QWidget):
                 option.setAutoExclusive(False)
                 option.setChecked(False)
                 option.setAutoExclusive(True)
-                self._update_progress(-1)
+                self._update_progress(False)
 
     @QtCore.Slot()
     def _update_progress(self, progress):
         """Set the label to show the number of answered questions"""
-        self.answered_questions += progress
-        self._progress_label.setText(f'{self.answered_questions}/{len(self.questions)} Respondidas')
+        self.answered_questions[self._question_layout.currentIndex()] = progress
+        answered_questions = sum(1 for condition in self.answered_questions.values() if condition) # replicating answered question values. 
+        self._progress_label.setText(f'{answered_questions}/{len(self.questions)} Respondidas')
 
 if __name__ == "__main__":
     qs = [
